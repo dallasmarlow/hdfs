@@ -2,8 +2,13 @@ package org.apache.mesos.hdfs.state
 
 import com.google.inject.Guice
 import org.apache.mesos.Protos
+<<<<<<< e516b4a8671b85a0f2516f1a4f4ba121ad1c3829
 import org.apache.mesos.hdfs.SchedulerModuleTest
 import org.apache.mesos.hdfs.scheduler.Task
+=======
+import org.apache.mesos.hdfs.TestSchedulerModule
+import org.apache.mesos.hdfs.state.TaskRecord
+>>>>>>> Journal Constraints 1st Draft
 import org.apache.mesos.hdfs.util.HDFSConstants
 import org.apache.mesos.protobuf.ExecutorInfoBuilder
 import org.apache.mesos.protobuf.FrameworkInfoUtil
@@ -63,7 +68,7 @@ class HdfsStateSpec extends Specification {
   def "update label none to label task"() {
     given:
     HdfsState state = injector.getInstance(HdfsState.class)
-    Task task1 = createTask(TEST_NAME)
+    TaskRecord task1 = createTask(TEST_NAME)
 
     def status = createTaskStatusWithLabel(task1.id, Protos.TaskState.TASK_RUNNING, "value")
     task1.status = status
@@ -80,7 +85,7 @@ class HdfsStateSpec extends Specification {
   def "update label to label task"() {
     given:
     HdfsState state = injector.getInstance(HdfsState.class)
-    Task task1 = createTask(TEST_NAME)
+    TaskRecord task1 = createTask(TEST_NAME)
 
     def status1 = createTaskStatusWithLabel(task1.getId(), Protos.TaskState.TASK_RUNNING, "value1")
     def status2 = createTaskStatusWithLabel(task1.getId(), Protos.TaskState.TASK_RUNNING, "value2")
@@ -91,14 +96,14 @@ class HdfsStateSpec extends Specification {
     state.update(null, status2)
 
     then:
-    Task outTask = state.getTasks().get(0)
+    TaskRecord outTask = state.getTasks().get(0)
     outTask.status == status2
   }
 
   def "update label tasks"() {
     given:
     HdfsState state = injector.getInstance(HdfsState.class)
-    Task task1 = createTask(TEST_NAME)
+    TaskRecord task1 = createTask(TEST_NAME)
 
     def status1 = createTaskStatusWithLabel(task1.getId(), Protos.TaskState.TASK_RUNNING, value1)
     def status2 = createTaskStatusWithLabel(task1.getId(), Protos.TaskState.TASK_RUNNING, value2)
@@ -109,7 +114,7 @@ class HdfsStateSpec extends Specification {
     state.update(null, status2)
 
     then:
-    Task outTask = state.getTasks().get(0)
+    TaskRecord outTask = state.getTasks().get(0)
     outTask.status == status1Valid ? status1 : status2
 
     where:
@@ -146,7 +151,7 @@ class HdfsStateSpec extends Specification {
     def execInfo = createExecutorInfo()
     def offer = createOffer()
     def taskIdName = createTaskIdName()
-    return new Task(resources, execInfo, offer, name, TEST_TYPE, taskIdName)
+    return new TaskRecord(resources, execInfo, offer, name, TEST_TYPE, taskIdName)
   }
 
   def createResourceList() {
