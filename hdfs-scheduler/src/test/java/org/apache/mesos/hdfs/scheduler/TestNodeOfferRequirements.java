@@ -2,10 +2,12 @@ package org.apache.mesos.hdfs.scheduler;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-
-import java.util.List;
-import java.util.ArrayList;
-
+import org.apache.mesos.Protos.Offer;
+import org.apache.mesos.Protos.Resource;
+import org.apache.mesos.Protos.Resource.DiskInfo;
+import org.apache.mesos.Protos.Resource.DiskInfo.Persistence;
+import org.apache.mesos.Protos.TaskID;
+import org.apache.mesos.hdfs.TestSchedulerModule;
 import org.apache.mesos.hdfs.config.HdfsFrameworkConfig;
 import org.apache.mesos.hdfs.config.NodeConfig;
 import org.apache.mesos.hdfs.state.AcquisitionPhase;
@@ -13,21 +15,15 @@ import org.apache.mesos.hdfs.state.HdfsState;
 import org.apache.mesos.hdfs.state.VolumeRecord;
 import org.apache.mesos.hdfs.util.DnsResolver;
 import org.apache.mesos.hdfs.util.HDFSConstants;
-import org.apache.mesos.hdfs.TestSchedulerModule;
-import org.apache.mesos.protobuf.ResourceBuilder;
 import org.apache.mesos.protobuf.OfferBuilder;
-import org.apache.mesos.Protos.Offer;
-import org.apache.mesos.Protos.Resource;
-import org.apache.mesos.Protos.Resource.DiskInfo;
-import org.apache.mesos.Protos.Resource.DiskInfo.Persistence;
-import org.apache.mesos.Protos.TaskID;
-
+import org.apache.mesos.protobuf.ResourceBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class TestNodeOfferRequirements {
@@ -80,7 +76,7 @@ public class TestNodeOfferRequirements {
 
   @Test
   public void canSatisfyJournalOfferRequirement() throws Exception {
-    when(state.getJournalCount()).thenReturn(TARGET_JOURNAL_COUNT-1);
+    when(state.getJournalCount()).thenReturn(TARGET_JOURNAL_COUNT - 1);
     OfferRequirementProvider provider = createOfferRequirementProvider();
     OfferRequirement constraint = provider.getNextOfferRequirement(AcquisitionPhase.JOURNAL_NODES);
 
@@ -89,53 +85,53 @@ public class TestNodeOfferRequirements {
     assertTrue(constraint.canBeSatisfied(offer));
 
     // Offers which lack the required resources of each type should be rejected
-    offer = createOfferBuilder(ENOUGH_JOURNAL_CPU-0.1, ENOUGH_JOURNAL_MEM, ENOUGH_JOURNAL_DISK).build();
+    offer = createOfferBuilder(ENOUGH_JOURNAL_CPU - 0.1, ENOUGH_JOURNAL_MEM, ENOUGH_JOURNAL_DISK).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
-    offer = createOfferBuilder(ENOUGH_JOURNAL_CPU, ENOUGH_JOURNAL_MEM-1, ENOUGH_JOURNAL_DISK).build();
+    offer = createOfferBuilder(ENOUGH_JOURNAL_CPU, ENOUGH_JOURNAL_MEM - 1, ENOUGH_JOURNAL_DISK).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
-    offer = createOfferBuilder(ENOUGH_JOURNAL_CPU, ENOUGH_JOURNAL_MEM, ENOUGH_JOURNAL_DISK-1).build();
+    offer = createOfferBuilder(ENOUGH_JOURNAL_CPU, ENOUGH_JOURNAL_MEM, ENOUGH_JOURNAL_DISK - 1).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
     // An offer with exactly the correct reserved resources should be accepted 
     offer = createReservedOfferBuilder(
-        ENOUGH_JOURNAL_CPU,
-        ENOUGH_JOURNAL_MEM,
-        ENOUGH_JOURNAL_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_JOURNAL_CPU,
+      ENOUGH_JOURNAL_MEM,
+      ENOUGH_JOURNAL_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertTrue(constraint.canBeSatisfied(offer));
 
     // Offers with too much reserved resources should be rejected 
     offer = createReservedOfferBuilder(
-        ENOUGH_JOURNAL_CPU+0.1,
-        ENOUGH_JOURNAL_MEM,
-        ENOUGH_JOURNAL_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_JOURNAL_CPU + 0.1,
+      ENOUGH_JOURNAL_MEM,
+      ENOUGH_JOURNAL_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
     offer = createReservedOfferBuilder(
-        ENOUGH_JOURNAL_CPU,
-        ENOUGH_JOURNAL_MEM+1,
-        ENOUGH_JOURNAL_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_JOURNAL_CPU,
+      ENOUGH_JOURNAL_MEM + 1,
+      ENOUGH_JOURNAL_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
     offer = createReservedOfferBuilder(
-        ENOUGH_JOURNAL_CPU,
-        ENOUGH_JOURNAL_MEM,
-        ENOUGH_JOURNAL_DISK+1,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_JOURNAL_CPU,
+      ENOUGH_JOURNAL_MEM,
+      ENOUGH_JOURNAL_DISK + 1,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.canBeSatisfied(offer));
   }
 
   @Test
   public void satisfiesJournalResourceOfferRequirements() throws Exception {
-    when(state.getJournalCount()).thenReturn(TARGET_JOURNAL_COUNT-1);
+    when(state.getJournalCount()).thenReturn(TARGET_JOURNAL_COUNT - 1);
     OfferRequirementProvider provider = createOfferRequirementProvider();
     OfferRequirement constraint = provider.getNextOfferRequirement(AcquisitionPhase.JOURNAL_NODES);
 
@@ -145,57 +141,57 @@ public class TestNodeOfferRequirements {
 
     // An offer with enough reserved resources should be accepted
     offer = createReservedOfferBuilder(
-        ENOUGH_JOURNAL_CPU,
-        ENOUGH_JOURNAL_MEM,
-        ENOUGH_JOURNAL_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_JOURNAL_CPU,
+      ENOUGH_JOURNAL_MEM,
+      ENOUGH_JOURNAL_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertTrue(constraint.isSatisfiedForReservations(offer));
 
     // An offer with enough reserved resources and a volume with the wrong persistence ID should be rejected 
     offer = createVolumeOfferBuilder(
-        ENOUGH_JOURNAL_CPU,
-        ENOUGH_JOURNAL_MEM,
-        ENOUGH_JOURNAL_DISK,
-        "bad-persistence-id",
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_JOURNAL_CPU,
+      ENOUGH_JOURNAL_MEM,
+      ENOUGH_JOURNAL_DISK,
+      "bad-persistence-id",
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.isSatisfiedForReservations(offer));
   }
 
   @Test
   public void satisfiesJournalVolumeOfferRequirements() throws Exception {
-    when(state.getJournalCount()).thenReturn(TARGET_JOURNAL_COUNT-1);
+    when(state.getJournalCount()).thenReturn(TARGET_JOURNAL_COUNT - 1);
     OfferRequirementProvider provider = createOfferRequirementProvider();
     OfferRequirement constraint = provider.getNextOfferRequirement(AcquisitionPhase.JOURNAL_NODES);
 
     // An offer with enough reserved resouces, but no volumes should be rejected
     Offer offer = createReservedOfferBuilder(
-        ENOUGH_JOURNAL_CPU,
-        ENOUGH_JOURNAL_MEM,
-        ENOUGH_JOURNAL_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_JOURNAL_CPU,
+      ENOUGH_JOURNAL_MEM,
+      ENOUGH_JOURNAL_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.isSatisfiedForVolumes(offer));
 
     // An offer with enough reserved resources and the correct persistence ID should be accepted
     offer = createVolumeOfferBuilder(
-        ENOUGH_JOURNAL_CPU,
-        ENOUGH_JOURNAL_MEM,
-        ENOUGH_JOURNAL_DISK,
-        expectedVolume.getPersistenceId(),
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_JOURNAL_CPU,
+      ENOUGH_JOURNAL_MEM,
+      ENOUGH_JOURNAL_DISK,
+      expectedVolume.getPersistenceId(),
+      config.getRole(),
+      config.getPrincipal()).build();
     assertTrue(constraint.isSatisfiedForVolumes(offer));
 
     // An offer with enough reserved resources and a volume with the wrong persistence ID should be rejected 
     offer = createVolumeOfferBuilder(
-        ENOUGH_JOURNAL_CPU,
-        ENOUGH_JOURNAL_MEM,
-        ENOUGH_JOURNAL_DISK,
-        "bad-persistence-id",
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_JOURNAL_CPU,
+      ENOUGH_JOURNAL_MEM,
+      ENOUGH_JOURNAL_DISK,
+      "bad-persistence-id",
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.isSatisfiedForVolumes(offer));
   }
 
@@ -209,7 +205,7 @@ public class TestNodeOfferRequirements {
   @Test
   public void canSatisfyNameOfferRequirement() throws Exception {
     when(dnsResolver.journalNodesResolvable()).thenReturn(true);
-    when(state.getNameCount()).thenReturn(TARGET_NAME_COUNT-1);
+    when(state.getNameCount()).thenReturn(TARGET_NAME_COUNT - 1);
     when(state.hostOccupied(any(String.class), eq(HDFSConstants.JOURNAL_NODE_ID))).thenReturn(true);
 
     OfferRequirementProvider provider = createOfferRequirementProvider();
@@ -220,54 +216,54 @@ public class TestNodeOfferRequirements {
     assertTrue(constraint.canBeSatisfied(offer));
 
     // Offers which lack the required resources of each type should be rejected
-    offer = createOfferBuilder(ENOUGH_NAME_CPU-0.1, ENOUGH_NAME_MEM, ENOUGH_NAME_DISK).build();
+    offer = createOfferBuilder(ENOUGH_NAME_CPU - 0.1, ENOUGH_NAME_MEM, ENOUGH_NAME_DISK).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
-    offer = createOfferBuilder(ENOUGH_NAME_CPU, ENOUGH_NAME_MEM-1, ENOUGH_NAME_DISK).build();
+    offer = createOfferBuilder(ENOUGH_NAME_CPU, ENOUGH_NAME_MEM - 1, ENOUGH_NAME_DISK).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
-    offer = createOfferBuilder(ENOUGH_NAME_CPU, ENOUGH_NAME_MEM, ENOUGH_NAME_DISK-1).build();
+    offer = createOfferBuilder(ENOUGH_NAME_CPU, ENOUGH_NAME_MEM, ENOUGH_NAME_DISK - 1).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
     // An offer with exactly the correct reserved resources should be accepted 
     offer = createReservedOfferBuilder(
-        ENOUGH_NAME_CPU,
-        ENOUGH_NAME_MEM,
-        ENOUGH_NAME_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_NAME_CPU,
+      ENOUGH_NAME_MEM,
+      ENOUGH_NAME_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertTrue(constraint.canBeSatisfied(offer));
 
     // Offers with too much reserved resources should be rejected 
     offer = createReservedOfferBuilder(
-        ENOUGH_NAME_CPU+0.1,
-        ENOUGH_NAME_MEM,
-        ENOUGH_NAME_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_NAME_CPU + 0.1,
+      ENOUGH_NAME_MEM,
+      ENOUGH_NAME_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
     offer = createReservedOfferBuilder(
-        ENOUGH_NAME_CPU,
-        ENOUGH_NAME_MEM+1,
-        ENOUGH_NAME_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_NAME_CPU,
+      ENOUGH_NAME_MEM + 1,
+      ENOUGH_NAME_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
     offer = createReservedOfferBuilder(
-        ENOUGH_NAME_CPU,
-        ENOUGH_NAME_MEM,
-        ENOUGH_NAME_DISK+1,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_NAME_CPU,
+      ENOUGH_NAME_MEM,
+      ENOUGH_NAME_DISK + 1,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.canBeSatisfied(offer));
   }
 
   @Test
   public void satisfiesNameResourceOfferRequirements() throws Exception {
     when(dnsResolver.journalNodesResolvable()).thenReturn(true);
-    when(state.getNameCount()).thenReturn(TARGET_NAME_COUNT-1);
+    when(state.getNameCount()).thenReturn(TARGET_NAME_COUNT - 1);
 
     OfferRequirementProvider provider = createOfferRequirementProvider();
     OfferRequirement constraint = provider.getNextOfferRequirement(AcquisitionPhase.NAME_NODES);
@@ -278,59 +274,59 @@ public class TestNodeOfferRequirements {
 
     // An offer with enough reserved resources should be accepted
     offer = createReservedOfferBuilder(
-        ENOUGH_NAME_CPU,
-        ENOUGH_NAME_MEM,
-        ENOUGH_NAME_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_NAME_CPU,
+      ENOUGH_NAME_MEM,
+      ENOUGH_NAME_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertTrue(constraint.isSatisfiedForReservations(offer));
 
     // An offer with enough reserved resources and a volume with the wrong persistence ID should be rejected 
     offer = createVolumeOfferBuilder(
-        ENOUGH_JOURNAL_CPU,
-        ENOUGH_JOURNAL_MEM,
-        ENOUGH_JOURNAL_DISK,
-        "bad-persistence-id",
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_JOURNAL_CPU,
+      ENOUGH_JOURNAL_MEM,
+      ENOUGH_JOURNAL_DISK,
+      "bad-persistence-id",
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.isSatisfiedForReservations(offer));
   }
 
   @Test
   public void satisfiesNameVolumeOfferRequirements() throws Exception {
     when(dnsResolver.journalNodesResolvable()).thenReturn(true);
-    when(state.getNameCount()).thenReturn(TARGET_NAME_COUNT-1);
+    when(state.getNameCount()).thenReturn(TARGET_NAME_COUNT - 1);
 
     OfferRequirementProvider provider = createOfferRequirementProvider();
     OfferRequirement constraint = provider.getNextOfferRequirement(AcquisitionPhase.NAME_NODES);
 
     // An offer with enough reserved resouces, but no volumes should be rejected
     Offer offer = createReservedOfferBuilder(
-        ENOUGH_NAME_CPU,
-        ENOUGH_NAME_MEM,
-        ENOUGH_NAME_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_NAME_CPU,
+      ENOUGH_NAME_MEM,
+      ENOUGH_NAME_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.isSatisfiedForVolumes(offer));
 
     // An offer with enough reserved resources and the correct persistence ID should be accepted
     offer = createVolumeOfferBuilder(
-        ENOUGH_NAME_CPU,
-        ENOUGH_NAME_MEM,
-        ENOUGH_NAME_DISK,
-        expectedVolume.getPersistenceId(),
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_NAME_CPU,
+      ENOUGH_NAME_MEM,
+      ENOUGH_NAME_DISK,
+      expectedVolume.getPersistenceId(),
+      config.getRole(),
+      config.getPrincipal()).build();
     assertTrue(constraint.isSatisfiedForVolumes(offer));
 
     // An offer with enough reserved resources and a volume with the wrong persistence ID should be rejected 
     offer = createVolumeOfferBuilder(
-        ENOUGH_NAME_CPU,
-        ENOUGH_NAME_MEM,
-        ENOUGH_NAME_DISK,
-        "bad-persistence-id",
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_NAME_CPU,
+      ENOUGH_NAME_MEM,
+      ENOUGH_NAME_DISK,
+      "bad-persistence-id",
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.isSatisfiedForVolumes(offer));
   }
 
@@ -352,47 +348,47 @@ public class TestNodeOfferRequirements {
     assertTrue(constraint.canBeSatisfied(offer));
 
     // Offers which lack the required resources of each type should be rejected
-    offer = createOfferBuilder(ENOUGH_JOURNAL_CPU-0.1, ENOUGH_DATA_MEM, ENOUGH_DATA_DISK).build();
+    offer = createOfferBuilder(ENOUGH_JOURNAL_CPU - 0.1, ENOUGH_DATA_MEM, ENOUGH_DATA_DISK).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
-    offer = createOfferBuilder(ENOUGH_DATA_CPU, ENOUGH_DATA_MEM-1, ENOUGH_DATA_DISK).build();
+    offer = createOfferBuilder(ENOUGH_DATA_CPU, ENOUGH_DATA_MEM - 1, ENOUGH_DATA_DISK).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
-    offer = createOfferBuilder(ENOUGH_DATA_CPU, ENOUGH_DATA_MEM, ENOUGH_DATA_DISK-1).build();
+    offer = createOfferBuilder(ENOUGH_DATA_CPU, ENOUGH_DATA_MEM, ENOUGH_DATA_DISK - 1).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
     // An offer with exactly the correct reserved resources should be accepted 
     offer = createReservedOfferBuilder(
-        ENOUGH_DATA_CPU,
-        ENOUGH_DATA_MEM,
-        ENOUGH_DATA_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_DATA_CPU,
+      ENOUGH_DATA_MEM,
+      ENOUGH_DATA_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertTrue(constraint.canBeSatisfied(offer));
 
     // Offers with too much reserved resources should be rejected 
     offer = createReservedOfferBuilder(
-        ENOUGH_DATA_CPU+0.1,
-        ENOUGH_DATA_MEM,
-        ENOUGH_DATA_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_DATA_CPU + 0.1,
+      ENOUGH_DATA_MEM,
+      ENOUGH_DATA_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
     offer = createReservedOfferBuilder(
-        ENOUGH_DATA_CPU,
-        ENOUGH_DATA_MEM+1,
-        ENOUGH_DATA_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_DATA_CPU,
+      ENOUGH_DATA_MEM + 1,
+      ENOUGH_DATA_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.canBeSatisfied(offer));
 
     offer = createReservedOfferBuilder(
-        ENOUGH_DATA_CPU,
-        ENOUGH_DATA_MEM,
-        ENOUGH_DATA_DISK+1,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_DATA_CPU,
+      ENOUGH_DATA_MEM,
+      ENOUGH_DATA_DISK + 1,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.canBeSatisfied(offer));
   }
 
@@ -407,21 +403,21 @@ public class TestNodeOfferRequirements {
 
     // An offer with enough reserved resources should be accepted
     offer = createReservedOfferBuilder(
-        ENOUGH_DATA_CPU,
-        ENOUGH_DATA_MEM,
-        ENOUGH_DATA_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_DATA_CPU,
+      ENOUGH_DATA_MEM,
+      ENOUGH_DATA_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertTrue(constraint.isSatisfiedForReservations(offer));
 
     // An offer with enough reserved resources and a volume with the wrong persistence ID should be rejected 
     offer = createVolumeOfferBuilder(
-        ENOUGH_DATA_CPU,
-        ENOUGH_DATA_MEM,
-        ENOUGH_DATA_DISK,
-        "bad-persistence-id",
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_DATA_CPU,
+      ENOUGH_DATA_MEM,
+      ENOUGH_DATA_DISK,
+      "bad-persistence-id",
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.isSatisfiedForReservations(offer));
   }
 
@@ -432,35 +428,35 @@ public class TestNodeOfferRequirements {
 
     // An offer with enough reserved resouces, but no volumes should be rejected
     Offer offer = createReservedOfferBuilder(
-        ENOUGH_DATA_CPU,
-        ENOUGH_DATA_MEM,
-        ENOUGH_DATA_DISK,
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_DATA_CPU,
+      ENOUGH_DATA_MEM,
+      ENOUGH_DATA_DISK,
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.isSatisfiedForVolumes(offer));
 
     // An offer with enough reserved resources and the correct persistence ID should be accepted
     offer = createVolumeOfferBuilder(
-        ENOUGH_DATA_CPU,
-        ENOUGH_DATA_MEM,
-        ENOUGH_DATA_DISK,
-        expectedVolume.getPersistenceId(),
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_DATA_CPU,
+      ENOUGH_DATA_MEM,
+      ENOUGH_DATA_DISK,
+      expectedVolume.getPersistenceId(),
+      config.getRole(),
+      config.getPrincipal()).build();
     assertTrue(constraint.isSatisfiedForVolumes(offer));
 
     // An offer with enough reserved resources and a volume with the wrong persistence ID should be rejected 
     offer = createVolumeOfferBuilder(
-        ENOUGH_DATA_CPU,
-        ENOUGH_DATA_MEM,
-        ENOUGH_DATA_DISK,
-        "bad-persistence-id",
-        config.getRole(),
-        config.getPrincipal()).build();
+      ENOUGH_DATA_CPU,
+      ENOUGH_DATA_MEM,
+      ENOUGH_DATA_DISK,
+      "bad-persistence-id",
+      config.getRole(),
+      config.getPrincipal()).build();
     assertFalse(constraint.isSatisfiedForVolumes(offer));
   }
 
-  private OfferRequirementProvider createOfferRequirementProvider() { 
+  private OfferRequirementProvider createOfferRequirementProvider() {
     return new OfferRequirementProvider(state, config, dnsResolver, expectedVolume);
   }
 
@@ -479,12 +475,12 @@ public class TestNodeOfferRequirements {
   }
 
   private OfferBuilder createVolumeOfferBuilder(
-      double cpus,
-      int mem,
-      int diskSize,
-      String persistenceId,
-      String role,
-      String principal) {
+    double cpus,
+    int mem,
+    int diskSize,
+    String persistenceId,
+    String role,
+    String principal) {
 
     DiskInfo diskInfo = createDiskInfo(persistenceId);
     Resource diskWithVolume = resourceBuilder.reservedDisk(diskSize, role, principal);
@@ -508,6 +504,6 @@ public class TestNodeOfferRequirements {
   private DiskInfo createDiskInfo(String persistenceId) {
     return DiskInfo.newBuilder()
       .setPersistence(Persistence.newBuilder()
-          .setId(persistenceId)).build();
+        .setId(persistenceId)).build();
   }
 }

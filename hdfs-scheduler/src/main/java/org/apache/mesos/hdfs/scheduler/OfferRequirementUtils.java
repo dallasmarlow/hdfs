@@ -62,6 +62,9 @@ public class OfferRequirementUtils {
             log.warn("Not enough Disk resources");
           }
           break;
+
+        default:
+          log.info("unexpected resource: " + resourceName);
       }
     }
 
@@ -77,8 +80,8 @@ public class OfferRequirementUtils {
   }
 
   public static double getNeededMem(double mem, HdfsFrameworkConfig config) {
-    double neededMem = (mem * config.getJvmOverhead())
-      + (config.getExecutorHeap() * config.getJvmOverhead());
+    double neededMem = mem * config.getJvmOverhead()
+      + config.getExecutorHeap() * config.getJvmOverhead();
 
     return (int) neededMem;
   }

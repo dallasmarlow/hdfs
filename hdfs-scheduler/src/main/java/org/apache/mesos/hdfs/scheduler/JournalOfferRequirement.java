@@ -1,18 +1,15 @@
 package org.apache.mesos.hdfs.scheduler;
 
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.mesos.Protos.Offer;
 import org.apache.mesos.hdfs.config.HdfsFrameworkConfig;
 import org.apache.mesos.hdfs.config.NodeConfig;
 import org.apache.mesos.hdfs.state.HdfsState;
 import org.apache.mesos.hdfs.state.VolumeRecord;
 import org.apache.mesos.hdfs.util.HDFSConstants;
-import org.apache.mesos.Protos.Offer;
-import org.apache.mesos.Protos.Resource;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  *
@@ -50,11 +47,11 @@ public class JournalOfferRequirement extends AbstractOfferRequirement {
     }
 
     if (!OfferRequirementUtils.enoughResources(
-          offer,
-          config,
-          nodeConfig.getCpus(),
-          nodeConfig.getMaxHeap(),
-          nodeConfig.getDiskSize())) {
+      offer,
+      config,
+      nodeConfig.getCpus(),
+      nodeConfig.getMaxHeap(),
+      nodeConfig.getDiskSize())) {
       log.info("Offer does not have enough resources");
     } else if (journalCount >= config.getJournalNodeCount()) {
       log.info(String.format("Already running %s journalnodes", config.getJournalNodeCount()));

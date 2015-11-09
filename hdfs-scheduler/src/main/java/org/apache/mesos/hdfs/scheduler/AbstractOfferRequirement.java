@@ -1,5 +1,6 @@
 package org.apache.mesos.hdfs.scheduler;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.mesos.Protos.Offer;
@@ -73,7 +74,7 @@ public abstract class AbstractOfferRequirement implements OfferRequirement {
         "Looking for persistence id: " + expectedPersistenceId +
           "; Found volume with persistence id: " + actualPersistenceId);
 
-      if (expectedPersistenceId == actualPersistenceId) {
+      if (StringUtils.equals(expectedPersistenceId, actualPersistenceId)) {
         return true;
       }
     }
