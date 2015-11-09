@@ -1,20 +1,21 @@
 package org.apache.mesos.hdfs.scheduler;
 
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.mesos.Protos.Offer;
 import org.apache.mesos.hdfs.config.HdfsFrameworkConfig;
 import org.apache.mesos.hdfs.config.NodeConfig;
 import org.apache.mesos.hdfs.state.HdfsState;
 import org.apache.mesos.hdfs.state.VolumeRecord;
 import org.apache.mesos.hdfs.util.DnsResolver;
 import org.apache.mesos.hdfs.util.HDFSConstants;
-import org.apache.mesos.Protos.Offer;
-import org.apache.mesos.Protos.Resource;
 
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+
+/**
+ *
+ */
 public class NameOfferRequirement extends AbstractOfferRequirement {
   private final Log log = LogFactory.getLog(NameOfferRequirement.class);
   private DnsResolver dnsResolver;
@@ -22,10 +23,10 @@ public class NameOfferRequirement extends AbstractOfferRequirement {
   private NodeConfig zkfcConfig;
 
   public NameOfferRequirement(
-      HdfsState state,
-      HdfsFrameworkConfig config,
-      DnsResolver dnsResolver,
-      VolumeRecord volume)
+    HdfsState state,
+    HdfsFrameworkConfig config,
+    DnsResolver dnsResolver,
+    VolumeRecord volume)
     throws ClassNotFoundException, InterruptedException, ExecutionException, IOException {
     super(state, config, volume, NameOfferRequirement.class);
     this.nameConfig = config.getNodeConfig(HDFSConstants.NAME_NODE_ID);
@@ -48,11 +49,11 @@ public class NameOfferRequirement extends AbstractOfferRequirement {
       }
 
       if (!OfferRequirementUtils.enoughResources(
-            offer,
-            config,
-            getNeededCpus(),
-            getNeededMem(),
-            getNeededDisk())) {
+        offer,
+        config,
+        getNeededCpus(),
+        getNeededMem(),
+        getNeededDisk())) {
         log.info("Offer does not have enough resources");
       } else if (nameCount >= HDFSConstants.TOTAL_NAME_NODES) {
         log.info(String.format("Already running %s namenodes", HDFSConstants.TOTAL_NAME_NODES));
@@ -78,7 +79,7 @@ public class NameOfferRequirement extends AbstractOfferRequirement {
   protected int getNeededMem() {
     return nameConfig.getMaxHeap() + zkfcConfig.getMaxHeap();
   }
-  
+
   protected int getNeededDisk() {
     return nameConfig.getDiskSize() + zkfcConfig.getDiskSize();
   }

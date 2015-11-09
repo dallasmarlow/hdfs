@@ -6,7 +6,7 @@ package org.apache.mesos.hdfs.state;
 public enum AcquisitionPhase {
 
   /**
-   * Performs task reconciliation 
+   * Performs task reconciliation.
    */
   RECONCILING_TASKS,
 

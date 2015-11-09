@@ -1,26 +1,26 @@
 package org.apache.mesos.hdfs.scheduler;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.mesos.Protos.Offer;
+import org.apache.mesos.Protos.Resource;
+import org.apache.mesos.hdfs.config.HdfsFrameworkConfig;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.mesos.hdfs.config.HdfsFrameworkConfig;
-import org.apache.mesos.Protos.Offer;
-import org.apache.mesos.Protos.Resource;
-
 /**
- * 
+ *
  */
 public class OfferRequirementUtils {
   private static final Log log = LogFactory.getLog(OfferRequirementUtils.class);
 
   public static boolean enoughResources(
-      Offer offer,
-      HdfsFrameworkConfig config,
-      double cpus,
-      int mem,
-      int disk) {
+    Offer offer,
+    HdfsFrameworkConfig config,
+    double cpus,
+    int mem,
+    int disk) {
 
     boolean enoughCpus = false;
     boolean enoughMem = false;
@@ -53,7 +53,7 @@ public class OfferRequirementUtils {
           }
           break;
 
-       case "disk":
+        case "disk":
           log.info("Needed Disk: " + disk + " Available disk: " + availableValue);
 
           if (resourcesAcceptable(resource, disk, availableValue)) {
@@ -87,16 +87,17 @@ public class OfferRequirementUtils {
     return cpus + config.getExecutorCpus();
   }
 
-  private static boolean scalarResourceReserved(Offer offer, String resourceName, double value, String role, String principal) {
+  private static boolean scalarResourceReserved(Offer offer,
+    String resourceName, double value, String role, String principal) {
     return getScalarReservedResources(offer, resourceName, value, role, principal).size() > 0;
   }
 
   public static List<Resource> getScalarReservedResources(
-      Offer offer,
-      String resourceName,
-      double value,
-      String role,
-      String principal) {
+    Offer offer,
+    String resourceName,
+    double value,
+    String role,
+    String principal) {
 
     List<Resource> reservedResources = new ArrayList<Resource>();
     for (Resource resource : offer.getResourcesList()) {
@@ -113,14 +114,14 @@ public class OfferRequirementUtils {
         log.info("Expected Principal: " + principal + " Actual Principal: " + resPrincipal);
 
         if (resPrincipal.equals(principal) &&
-            resRole.equals(role) &&
-            resValue == value) {
+          resRole.equals(role) &&
+          resValue == value) {
           reservedResources.add(resource);
         }
       }
     }
 
-    return reservedResources; 
+    return reservedResources;
   }
 
   public static boolean isReserved(Resource resource) {
@@ -128,7 +129,7 @@ public class OfferRequirementUtils {
     String role = resource.getRole();
 
     if (role != null && !role.isEmpty() &&
-        principal != null && !principal.isEmpty()) {
+      principal != null && !principal.isEmpty()) {
       return true;
     }
 
@@ -143,7 +144,8 @@ public class OfferRequirementUtils {
     return scalarResourceReserved(offer, "mem", mem, role, principal);
   }
 
-  public static boolean diskReserved(Offer offer, double diskSize, String role, String principal, String persistenceId) {
+  public static boolean diskReserved(Offer offer,
+    double diskSize, String role, String principal, String persistenceId) {
     List<Resource> reservedResources = getScalarReservedResources(offer, "disk", diskSize, role, principal);
     for (Resource resource : reservedResources) {
       String actualPersistenceId = getPersistenceId(resource);
@@ -155,7 +157,8 @@ public class OfferRequirementUtils {
     return false;
   }
 
-  public static boolean volumeCreated(Offer offer, double diskSpace, String role, String principal, String persistenceId) {
+  public static boolean volumeCreated(Offer offer,
+    double diskSpace, String role, String principal, String persistenceId) {
     return false;
   }
 

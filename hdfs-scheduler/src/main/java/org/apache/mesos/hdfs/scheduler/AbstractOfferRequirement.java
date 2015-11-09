@@ -1,18 +1,16 @@
 package org.apache.mesos.hdfs.scheduler;
 
-import java.io.IOException;
-import java.util.concurrent.ExecutionException;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.mesos.hdfs.config.HdfsFrameworkConfig;
-import org.apache.mesos.hdfs.config.NodeConfig;
-import org.apache.mesos.hdfs.state.HdfsState;
-import org.apache.mesos.hdfs.state.VolumeRecord;
-import org.apache.mesos.hdfs.util.HDFSConstants;
 import org.apache.mesos.Protos.Offer;
 import org.apache.mesos.Protos.Resource;
+import org.apache.mesos.hdfs.config.HdfsFrameworkConfig;
+import org.apache.mesos.hdfs.state.HdfsState;
+import org.apache.mesos.hdfs.state.VolumeRecord;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  *
@@ -24,10 +22,10 @@ public abstract class AbstractOfferRequirement implements OfferRequirement {
   protected Log log;
 
   public AbstractOfferRequirement(
-      HdfsState state,
-      HdfsFrameworkConfig config,
-      VolumeRecord volume, 
-      Class subClass)
+    HdfsState state,
+    HdfsFrameworkConfig config,
+    VolumeRecord volume,
+    Class subClass)
     throws ClassNotFoundException, InterruptedException, ExecutionException, IOException {
     this.state = state;
     this.config = config;
@@ -65,13 +63,14 @@ public abstract class AbstractOfferRequirement implements OfferRequirement {
     String principal = config.getPrincipal();
     String expectedPersistenceId = volume.getPersistenceId();
 
-    List<Resource> reservedResources = OfferRequirementUtils.getScalarReservedResources(offer, "disk", diskSize, role, principal);
+    List<Resource> reservedResources =
+      OfferRequirementUtils.getScalarReservedResources(offer, "disk", diskSize, role, principal);
 
     for (Resource resource : reservedResources) {
       String actualPersistenceId = OfferRequirementUtils.getPersistenceId(resource);
 
       log.info(
-          "Looking for persistence id: " + expectedPersistenceId +
+        "Looking for persistence id: " + expectedPersistenceId +
           "; Found volume with persistence id: " + actualPersistenceId);
 
       if (expectedPersistenceId == actualPersistenceId) {
@@ -83,6 +82,8 @@ public abstract class AbstractOfferRequirement implements OfferRequirement {
   }
 
   protected abstract double getNeededCpus();
+
   protected abstract int getNeededMem();
+
   protected abstract int getNeededDisk();
 }
