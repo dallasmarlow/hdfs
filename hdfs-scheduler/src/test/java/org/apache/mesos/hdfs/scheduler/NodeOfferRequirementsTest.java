@@ -7,7 +7,7 @@ import org.apache.mesos.Protos.Resource;
 import org.apache.mesos.Protos.Resource.DiskInfo;
 import org.apache.mesos.Protos.Resource.DiskInfo.Persistence;
 import org.apache.mesos.Protos.TaskID;
-import org.apache.mesos.hdfs.TestSchedulerModule;
+import org.apache.mesos.hdfs.SchedulerTestModule;
 import org.apache.mesos.hdfs.config.HdfsFrameworkConfig;
 import org.apache.mesos.hdfs.config.NodeConfig;
 import org.apache.mesos.hdfs.state.AcquisitionPhase;
@@ -26,8 +26,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
-public class TestNodeOfferRequirements {
-  private final Injector injector = Guice.createInjector(new TestSchedulerModule());
+public class NodeOfferRequirementsTest {
+  private final Injector injector = Guice.createInjector(new SchedulerTestModule());
   private HdfsFrameworkConfig config = injector.getInstance(HdfsFrameworkConfig.class);
   private ResourceBuilder resourceBuilder = new ResourceBuilder(config.getRole());
 

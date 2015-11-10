@@ -10,12 +10,7 @@ import org.apache.mesos.Protos.Resource.DiskInfo;
 import org.apache.mesos.Protos.TaskID;
 import org.apache.mesos.Protos.TaskState;
 import org.apache.mesos.Protos.TaskStatus;
-<<<<<<< e516b4a8671b85a0f2516f1a4f4ba121ad1c3829:hdfs-scheduler/src/test/java/org/apache/mesos/hdfs/state/HdfsStateTest.java
-import org.apache.mesos.hdfs.SchedulerModuleTest;
-import org.apache.mesos.hdfs.scheduler.Task;
-=======
-import org.apache.mesos.hdfs.TestSchedulerModule;
->>>>>>> Journal Constraints 1st Draft:hdfs-scheduler/src/test/java/org/apache/mesos/hdfs/state/TestHdfsState.java
+import org.apache.mesos.hdfs.SchedulerTestModule;
 import org.apache.mesos.hdfs.util.HDFSConstants;
 import org.apache.mesos.hdfs.util.TaskStatusFactory;
 import org.apache.mesos.protobuf.CommandInfoBuilder;
@@ -35,7 +30,7 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.*;
 
 public class HdfsStateTest {
-  private final Injector injector = Guice.createInjector(new SchedulerModuleTest());
+  private final Injector injector = Guice.createInjector(new SchedulerTestModule());
   private SecureRandom random = new SecureRandom();
   private static final String testIdName = "framework";
   private static final String TEST_HOST = "host";

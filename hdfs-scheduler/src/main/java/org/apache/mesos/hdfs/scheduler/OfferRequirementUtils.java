@@ -11,7 +11,7 @@ import java.util.List;
 
 /**
  * Provides static utility functions for working with Offers and Resources in the context of
- * evaluating and meeting OfferRequirements
+ * evaluating and meeting OfferRequirements.
  */
 public class OfferRequirementUtils {
   private static final Log log = LogFactory.getLog(OfferRequirementUtils.class);

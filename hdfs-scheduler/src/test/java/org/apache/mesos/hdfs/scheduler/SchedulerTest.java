@@ -6,7 +6,7 @@ import com.google.inject.Injector;
 import org.apache.mesos.Protos.Offer;
 import org.apache.mesos.Protos.TaskInfo;
 import org.apache.mesos.SchedulerDriver;
-import org.apache.mesos.hdfs.SchedulerModuleTest;
+import org.apache.mesos.hdfs.SchedulerTestModule;
 import org.apache.mesos.hdfs.config.HdfsFrameworkConfig;
 import org.apache.mesos.hdfs.state.AcquisitionPhase;
 import org.apache.mesos.hdfs.state.HdfsState;
@@ -31,7 +31,7 @@ import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
 public class SchedulerTest {
-  private final Injector injector = Guice.createInjector(new SchedulerModuleTest());
+  private final Injector injector = Guice.createInjector(new SchedulerTestModule());
   private HdfsFrameworkConfig config = injector.getInstance(HdfsFrameworkConfig.class);
   private final int TARGET_JOURNAL_COUNT = config.getJournalNodeCount();
 

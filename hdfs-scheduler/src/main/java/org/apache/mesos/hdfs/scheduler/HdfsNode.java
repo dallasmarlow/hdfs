@@ -7,6 +7,7 @@ import org.apache.mesos.SchedulerDriver;
 import org.apache.mesos.hdfs.config.HdfsFrameworkConfig;
 import org.apache.mesos.hdfs.config.NodeConfig;
 import org.apache.mesos.hdfs.state.HdfsState;
+import org.apache.mesos.hdfs.state.TaskRecord;
 import org.apache.mesos.hdfs.util.HDFSConstants;
 import org.apache.mesos.protobuf.CommandInfoBuilder;
 import org.apache.mesos.protobuf.EnvironmentBuilder;
@@ -209,7 +210,7 @@ public abstract class HdfsNode implements IOfferEvaluator, ILauncher {
   private List<TaskRecord> createTasks(Offer offer) {
     String executorName = getExecutorName();
     String taskIdName = String.format("%s.%s.%d", name, executorName, System.currentTimeMillis());
-    List<Task> tasks = new ArrayList<>();
+    List<TaskRecord> tasks = new ArrayList<>();
 
     String nnNum = getTaskTypes().contains(HDFSConstants.NAME_NODE_ID)
       ? getNextTaskName(HDFSConstants.NAME_NODE_ID)
@@ -221,7 +222,7 @@ public abstract class HdfsNode implements IOfferEvaluator, ILauncher {
       List<Resource> resources = getTaskResources(type);
       ExecutorInfo execInfo = createExecutor(taskIdName, name, nnNum, executorName);
 
-      tasks.add(new Task(resources, execInfo, offer, taskName, type, taskIdName));
+      tasks.add(new TaskRecord(resources, execInfo, offer, taskName, type, taskIdName));
     }
 
     return tasks;

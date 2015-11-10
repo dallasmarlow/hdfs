@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Encapsulates the common elements of the node OfferRequirements
+ * Encapsulates the common elements of the node OfferRequirements.
  */
 public abstract class AbstractOfferRequirement implements OfferRequirement {
   protected HdfsState state;
