@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 /**
- *
+ * Encapsulates the requirements an Offer must meet before a DataNode Task may be launched.
  */
 public class DataOfferRequirement extends AbstractOfferRequirement {
   private NodeConfig nodeConfig;

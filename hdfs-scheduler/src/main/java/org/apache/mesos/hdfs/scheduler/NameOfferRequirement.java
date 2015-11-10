@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 /**
- *
+ * Encapsulates the requirements an Offer must meet before a NameNode Task may be launched.
  */
 public class NameOfferRequirement extends AbstractOfferRequirement {
   private final Log log = LogFactory.getLog(NameOfferRequirement.class);

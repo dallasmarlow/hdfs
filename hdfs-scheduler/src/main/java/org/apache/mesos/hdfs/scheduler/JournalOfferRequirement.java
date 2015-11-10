@@ -8,11 +8,10 @@ import org.apache.mesos.hdfs.state.VolumeRecord;
 import org.apache.mesos.hdfs.util.HDFSConstants;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
- *
+ * Encapsulates the requirements an Offer must meet before a JournalNode Task may be launched.
  */
 public class JournalOfferRequirement extends AbstractOfferRequirement {
   private NodeConfig nodeConfig;
@@ -21,18 +20,6 @@ public class JournalOfferRequirement extends AbstractOfferRequirement {
     throws ClassNotFoundException, InterruptedException, ExecutionException, IOException {
     super(state, config, volume, JournalOfferRequirement.class);
     this.nodeConfig = config.getNodeConfig(HDFSConstants.JOURNAL_NODE_ID);
-  }
-
-  private VolumeRecord getFirstOrphanedJournalVolume()
-    throws ClassNotFoundException, InterruptedException, ExecutionException, IOException {
-
-    List<VolumeRecord> orphanedVolumes = state.getOrphanedVolumes(HDFSConstants.JOURNAL_NODE_ID);
-
-    if (orphanedVolumes.size() > 0) {
-      return orphanedVolumes.get(0);
-    } else {
-      return null;
-    }
   }
 
   public boolean canBeSatisfied(Offer offer) {

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
- *
+ * Encapsulates the common elements of the node OfferRequirements
  */
 public abstract class AbstractOfferRequirement implements OfferRequirement {
   protected HdfsState state;
@@ -42,7 +42,7 @@ public abstract class AbstractOfferRequirement implements OfferRequirement {
     String expectedPersistenceId = volume.getPersistenceId();
 
     double cpus = OfferRequirementUtils.getNeededCpus(getNeededCpus(), config);
-    int mem = (int) OfferRequirementUtils.getNeededMem(getNeededMem(), config);
+    double mem = OfferRequirementUtils.getNeededMem(getNeededMem(), config);
     int diskSize = getNeededDisk();
 
     if (!OfferRequirementUtils.cpuReserved(offer, cpus, role, principal)) {

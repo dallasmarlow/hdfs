@@ -9,7 +9,8 @@ import org.apache.mesos.hdfs.state.VolumeRecord;
 import org.apache.mesos.hdfs.util.DnsResolver;
 
 /**
- *
+ * The OfferRequirementProvider determines what type of Node must be launched next and the
+ * requirements it must meet.
  */
 public class OfferRequirementProvider {
   private HdfsState state;
